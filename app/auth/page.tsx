@@ -1,8 +1,10 @@
 "use client"
+import axios from 'axios';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input'
 import React from 'react'
+
 
 export default function Auth() {
   const [email, setEmail] = React.useState('');
@@ -14,6 +16,24 @@ export default function Auth() {
   const toggleVariant = React.useCallback(() => {
     setVariant((currentVariant) => currentVariant === 'login' ? 'register' : 'login');
   }, [])
+
+  const register = React.useCallback( async() => {
+    try {
+      await(axios.post('/api/register', {
+        email,
+        name,
+        password
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }  
+    ))
+    } catch (error) {
+      console.log(error);
+    }
+  }, [email, name, password])
 
   return (
     <div className='relative h-full w-full bg-[url("/images/hero.png")] bg-no-repeat bg-center bg-fixed bg-cover'> 
@@ -166,7 +186,7 @@ export default function Auth() {
                   Password
                 </label>
               </div>
-              <Button className='bg-red-600 py-3 text-white rounded-md mt-10 hover:bg-red-700 transition'>
+              <Button onClick={register} className='bg-red-600 py-3 text-white rounded-md mt-10 hover:bg-red-700 transition'>
                 {variant === 'register' ? 'Register' : 'Log in'}
               </Button>
               <div className="text-neutral-500 mt-12">
