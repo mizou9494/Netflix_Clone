@@ -55,7 +55,7 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model CerificationToken {
+model CertificationToken {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   identifier String
   token String @unique
@@ -71,5 +71,4 @@ model Movie {
   videoUrl String
   thumbnail String
   genre String
-  duration String
 }

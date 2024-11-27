@@ -2,11 +2,22 @@ import bcrypt from "bcrypt";
 import { NextApiRequest, NextApiResponse } from "next";
 import prismadb from "@/lib/prismadb";
 
+export const config = {
+    api: {
+        bodyParser: true, // Ensure bodyParser is enabled
+    },
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     
+    // return NextResponse.json({ name: "John Doe" });
+
     if(req.method !== "POST") {
-        console.log("!!!!!!!! this is the request body : ", req.body);
-        return res?.status(405).end();
+        console.log("!!!!!!!! this is the response body : ", JSON.stringify(req));
+        return res.status(401).json({ message: "Method not alloweeeeeeed" });
+        // return NextResponse.json({
+        //     error: "Method not allowed"
+        // });
     }
 
     try {
@@ -39,5 +50,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     } catch (error) {
         console.log(error);
+        return res.status(500).json({ error: "!!!!!!!!!!! Internal Server Error !!!!!!!!!!!" });
     }
 }
