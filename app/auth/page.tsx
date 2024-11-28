@@ -1,12 +1,22 @@
 "use client"
+import React from 'react'
 import axios from 'axios';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input'
-import React from 'react'
+import { signIn } from 'next-auth/react';
 
+// this one below doesn't work correctly with the mixed routing setup we are using
+// import { useRouter } from 'next/router';
+// This is the router that is working correctly with our setup
+import { useRouter } from 'next/navigation';
+
+import { FcGoogle } from 'react-icons/fc';
+import { FaGithub } from 'react-icons/fa';
 
 export default function Auth() {
+  const router = useRouter();
+
   const [email, setEmail] = React.useState('');
   const [name, setName] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -17,19 +27,37 @@ export default function Auth() {
     setVariant((currentVariant) => currentVariant === 'login' ? 'register' : 'login');
   }, [])
 
+  React.useEffect(() => {
+    console.log(router)
+  }, [])
+
+  const login = React.useCallback( async() => {
+    try {
+      await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+        fallbackCallbackUrl: '/'
+      })
+
+      // console.log(router)
+      router.push('/');
+
+    } catch (error) {
+      console.log(error)
+    }
+  }, [email, password])
+
   const register = React.useCallback( async() => {
     try {
       await(axios.post('/api/register', {
         email,
         name,
         password
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }  
-    ))
+      }))
+
+      login();
+
     } catch (error) {
       console.log(error);
     }
@@ -48,6 +76,52 @@ export default function Auth() {
             </h2>
             <div className="flex flex-col gap-4">
               {variant === 'register' && (
+                <div className='relative'>
+                  <Input 
+                    id='name'
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className='
+                      block 
+                      rounded 
+                      px-6 
+                      pt-6 
+                      pb-4 
+                      w-full 
+                      text-md 
+                      text-white 
+                      bg-neutral-700 
+                      appearance-none 
+                      focus:outline-none 
+                      focus:ring-0 
+                      peer
+                    ' 
+                    placeholder=' ' 
+                  />
+                  <label
+                    htmlFor="name"
+                    className='
+                      absolute
+                      text-md
+                      text-zinc-400
+                      duration-150
+                      transform
+                      -translate-y-3
+                      scale-75
+                      top-4
+                      z-10
+                      origin-[0]
+                      left-6
+                      peer-placeholder-shown:scale-100
+                      peer-placeholder-shown:translate-y-0
+                      peer-focus:scale-75
+                      peer-focus:-translate-y-3
+                    '  
+                  >
+                    Username
+                  </label>
+                </div>
+              )}
                 <div className='relative'>
                   <Input 
                     type='email'
@@ -94,52 +168,6 @@ export default function Auth() {
                     Email
                   </label>
                 </div>
-              )}
-              <div className='relative'>
-                <Input 
-                  id='name'
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className='
-                    block 
-                    rounded 
-                    px-6 
-                    pt-6 
-                    pb-4 
-                    w-full 
-                    text-md 
-                    text-white 
-                    bg-neutral-700 
-                    appearance-none 
-                    focus:outline-none 
-                    focus:ring-0 
-                    peer
-                  ' 
-                  placeholder=' ' 
-                />
-                <label
-                  htmlFor="email"
-                  className='
-                    absolute
-                    text-md
-                    text-zinc-400
-                    duration-150
-                    transform
-                    -translate-y-3
-                    scale-75
-                    top-4
-                    z-10
-                    origin-[0]
-                    left-6
-                    peer-placeholder-shown:scale-100
-                    peer-placeholder-shown:translate-y-0
-                    peer-focus:scale-75
-                    peer-focus:-translate-y-3
-                  '  
-                >
-                  Username
-                </label>
-              </div>
               <div className='relative'>
                 <Input 
                   type='password'
@@ -186,9 +214,41 @@ export default function Auth() {
                   Password
                 </label>
               </div>
-              <Button onClick={register} className='bg-red-600 py-3 text-white rounded-md mt-10 hover:bg-red-700 transition'>
+              <Button onClick={variant === 'login' ? login : register} className='bg-red-600 py-3 text-white rounded-md mt-10 hover:bg-red-700 transition'>
                 {variant === 'register' ? 'Register' : 'Log in'}
               </Button>
+              <div className='flex flex-row justify-center items-center gap-4 mt-8'>
+                <div 
+                  className="
+                    w-10 
+                    h-10 
+                    bg-white 
+                    rounded-full
+                    flex
+                    items-center
+                    justify-center
+                    cursor-pointer
+                    hover:opacity-80
+                    transition
+                  ">
+                    <FcGoogle size={30} />
+                </div>
+                <div 
+                  className="
+                    w-10 
+                    h-10 
+                    bg-white 
+                    rounded-full
+                    flex
+                    items-center
+                    justify-center
+                    cursor-pointer
+                    hover:opacity-80
+                    transition
+                  ">
+                    <FaGithub size={30} />
+                </div>
+              </div>
               <div className="text-neutral-500 mt-12">
                 {variant === 'login' ? 'First time using Netflix?' : 'Already have an account?'}
                 <span onClick={() => toggleVariant()} className='text-white mt-1 hover:underline cursor-pointer ml-1'>
